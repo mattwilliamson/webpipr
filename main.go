@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"mime"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -27,6 +28,10 @@ type SourceRequest struct {
 // sourceSinkMap keeps track of which pipr token goes to which sink pipr client
 var sourceSinkMap = make(map[string]chan *SourceRequest)
 
+// Host github homepage via proxying
+var ghUrl, _ = url.Parse("https://github.com/mattwilliamson/webpipr/")
+var ghProxy = http.ProxyURL(ghUrl)
+
 // newToken generates a string of random characters of a given length
 func newToken(length int) string {
 	b := make([]rune, length)
@@ -34,12 +39,6 @@ func newToken(length int) string {
 		b[i] = letters[rand.Intn(len(letters))]
 	}
 	return string(b)
-}
-
-// index redirects to a new in pipr with a fresh random token
-func index(rw http.ResponseWriter, req *http.Request) {
-	url := "/out/" + newToken(16)
-	http.Redirect(rw, req, url, http.StatusTemporaryRedirect)
 }
 
 // getTokenExt parses out token and file extension
@@ -72,10 +71,21 @@ func typeForExt(ext string) string {
 	return t
 }
 
+// index hosts the github page by proxy
+func indexHandler(rw http.ResponseWriter, req *http.Request) {
+	ghProxy(req)
+}
+
+// newToken redirects to a new in pipr with a fresh random token
+func newHandler(rw http.ResponseWriter, req *http.Request) {
+	url := "/out/" + newToken(16)
+	http.Redirect(rw, req, url, http.StatusTemporaryRedirect)
+}
+
 // sink handles requests for clients waiting for callbacks
 // if the token ends in .txt, we will format the POST/GET params like so: $key=$value\n
 // if the token ends in .json, we will format the POST/GET params like so: {$key=$value, $key2=$value2}
-func sink(outRw http.ResponseWriter, outReq *http.Request) {
+func sinkHandler(outRw http.ResponseWriter, outReq *http.Request) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in sink", r)
@@ -144,7 +154,7 @@ func sink(outRw http.ResponseWriter, outReq *http.Request) {
 }
 
 // source handles requests for clients sending callbacks to other waiting clients
-func source(rw http.ResponseWriter, req *http.Request) {
+func sourceHandler(rw http.ResponseWriter, req *http.Request) {
 	token, ext := getTokenExt(req.URL.Path)
 
 	log.Printf("-> START - SOURCING for token '%v' with extension '%v'", token, ext)
@@ -184,11 +194,14 @@ func main() {
 		address = ":8080"
 	}
 
-	http.HandleFunc("/in/", source)
-	http.HandleFunc("/out/", sink)
-	http.HandleFunc("/", index)
+	http.HandleFunc("/in/", sourceHandler)
+	http.HandleFunc("/out/", sinkHandler)
+	http.HandleFunc("/new/", newHandler)
+	http.HandleFunc("/", indexHandler)
 
 	log.Printf("Server running on %v...", address)
 
-	http.ListenAndServe(address, nil)
+	err := http.ListenAndServe(address, nil)
+
+	log.Fatalf("Error listening: %v", err)
 }

@@ -2,6 +2,8 @@
 
 Webpipr allows you to send one request to it and wait for a second request to hit it. It can be used for services like [TelAPI](http://telapi.com), to pass XML to a call request.
 
+http://webpipr.com/new/ will get you a new url to listen on.
+
 
 ## Basic Usage
 
