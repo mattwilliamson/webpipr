@@ -8,7 +8,6 @@ import (
 	"math/rand"
 	"mime"
 	"net/http"
-	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -27,10 +26,6 @@ type SourceRequest struct {
 
 // sourceSinkMap keeps track of which pipr token goes to which sink pipr client
 var sourceSinkMap = make(map[string]chan *SourceRequest)
-
-// Host github homepage via proxying
-var ghUrl, _ = url.Parse("https://github.com/mattwilliamson/webpipr/")
-var ghProxy = http.ProxyURL(ghUrl)
 
 // newToken generates a string of random characters of a given length
 func newToken(length int) string {
@@ -73,7 +68,12 @@ func typeForExt(ext string) string {
 
 // index hosts the github page by proxy
 func indexHandler(rw http.ResponseWriter, req *http.Request) {
-	ghProxy(req)
+	log.Print("Redirecting to github readme")
+	res, err := http.Get("https://github.com/mattwilliamson/webpipr/blob/master/README.md")
+
+	if err == nil {
+		io.Copy(rw, res.Body)
+	}
 }
 
 // newToken redirects to a new in pipr with a fresh random token
