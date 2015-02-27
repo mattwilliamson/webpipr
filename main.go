@@ -68,17 +68,19 @@ func typeForExt(ext string) string {
 
 // index hosts the github page by proxy
 func indexHandler(rw http.ResponseWriter, req *http.Request) {
-	log.Print("Redirecting to github readme")
+	log.Print("Redirecting to github readme...")
 	res, err := http.Get("https://github.com/mattwilliamson/webpipr/blob/master/README.md")
 
 	if err == nil {
 		io.Copy(rw, res.Body)
+	} else {
+		log.Printf("error proxying request: %v", err)
 	}
 }
 
 // newToken redirects to a new in pipr with a fresh random token
 func newHandler(rw http.ResponseWriter, req *http.Request) {
-	url := "/out/" + newToken(16)
+	url := "/wait/" + newToken(16)
 	http.Redirect(rw, req, url, http.StatusTemporaryRedirect)
 }
 
@@ -194,7 +196,9 @@ func main() {
 		address = ":8080"
 	}
 
+	http.HandleFunc("/notify/", sourceHandler)
 	http.HandleFunc("/in/", sourceHandler)
+	http.HandleFunc("/wait/", sinkHandler)
 	http.HandleFunc("/out/", sinkHandler)
 	http.HandleFunc("/new/", newHandler)
 	http.HandleFunc("/", indexHandler)

@@ -9,18 +9,18 @@ http://webpipr.com/new/ will get you a new url to listen on.
 
 POST and GET params are passed to the waiting request.
 
- * Wait for callback: Send request to http://webpipr.com/out/somerandomstring
- * Send callback: Send request to http://webpipr.com/in/somerandomstring
+ * Wait for callback: Send request to http://webpipr.com/wait/somerandomstring
+ * Send callback: Send request to http://webpipr.com/notify/somerandomstring
 
 #### Window 1
 
-    $ curl webpipr.com/out/somerandomstring
+    $ curl webpipr.com/wait/somerandomstring
     last=3
     first=1
 
 #### Window 2
 
-    $ curl 'webpipr.com/in/somerandomstring?first=1&last=3'
+    $ curl 'webpipr.com/notify/somerandomstring?first=1&last=3'
 
 
 
@@ -28,7 +28,7 @@ POST and GET params are passed to the waiting request.
 
 Use `--max-time` or `-m` for `curl` to timeout if it hasn't received the callback in a set amount of time.
 
-    $ curl -m 5 webpipr.com/out/anotherrandomstring
+    $ curl -m 5 webpipr.com/wait/anotherrandomstring
     curl: (28) Operation timed out after 5005 milliseconds with 0 out of -1 bytes received
 
 
@@ -39,7 +39,7 @@ You may append a file extension to the url to set the content type. For the wait
 
 #### Window 1
 
-    $ curl --max-time 30 webpipr.com/out/parametertest.json
+    $ curl --max-time 30 webpipr.com/wait/parametertest.json
     {
         "first": "1",
         "last": "3"
@@ -47,7 +47,7 @@ You may append a file extension to the url to set the content type. For the wait
 
 #### Window 2
 
-    $ curl 'webpipr.com/in/parametertest?first=1' -d 'last=3'
+    $ curl 'webpipr.com/notify/parametertest?first=1' -d 'last=3'
 
 
 
@@ -57,13 +57,13 @@ Use `--data-binary @-` to tell `curl` to send the piped in stdin to the callback
 
 #### Window 1
     
-    $ echo '<Response><Say>Hello worl</Say></Response>' | curl --data-binary @- webpipr.com/out/customcontent
+    $ echo '<Response><Say>Hello worl</Say></Response>' | curl --data-binary @- webpipr.com/wait/customcontent
 
 ![Callee](https://raw.githubusercontent.com/mattwilliamson/webpipr/master/callee.gif)
 
 #### Window 2
     
-    $ curl 'webpipr.com/in/customcontent.xml'
+    $ curl 'webpipr.com/notify/customcontent.xml'
     <Response><Say>Hello worl</Say></Response>
 
 ![Caller](https://raw.githubusercontent.com/mattwilliamson/webpipr/master/caller.gif)
