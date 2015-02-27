@@ -196,10 +196,13 @@ func main() {
 		address = ":8080"
 	}
 
-	http.HandleFunc("/notify/", sourceHandler)
+	http.HandleFunc("/callback/", sourceHandler)
 	http.HandleFunc("/in/", sourceHandler)
+	http.HandleFunc("/notify/", sourceHandler)
+
 	http.HandleFunc("/wait/", sinkHandler)
 	http.HandleFunc("/out/", sinkHandler)
+
 	http.HandleFunc("/new/", newHandler)
 	http.HandleFunc("/", indexHandler)
 

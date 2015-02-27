@@ -10,7 +10,7 @@ http://webpipr.com/new/ will get you a new url to listen on.
 POST and GET params are passed to the waiting request.
 
  * Wait for callback: Send request to http://webpipr.com/wait/somerandomstring
- * Send callback: Send request to http://webpipr.com/notify/somerandomstring
+ * Send callback: Send request to http://webpipr.com/callback/somerandomstring
 
 #### Window 1
 
@@ -20,7 +20,7 @@ POST and GET params are passed to the waiting request.
 
 #### Window 2
 
-    $ curl 'webpipr.com/notify/somerandomstring?first=1&last=3'
+    $ curl 'webpipr.com/callback/somerandomstring?first=1&last=3'
 
 
 
@@ -47,7 +47,7 @@ You may append a file extension to the url to set the content type. For the wait
 
 #### Window 2
 
-    $ curl 'webpipr.com/notify/parametertest?first=1' -d 'last=3'
+    $ curl 'webpipr.com/callback/parametertest?first=1' -d 'last=3'
 
 
 
@@ -63,7 +63,7 @@ Use `--data-binary @-` to tell `curl` to send the piped in stdin to the callback
 
 #### Window 2
     
-    $ curl 'webpipr.com/notify/customcontent.xml'
+    $ curl 'webpipr.com/callback/customcontent.xml'
     <Response><Say>Hello worl</Say></Response>
 
 ![Caller](https://raw.githubusercontent.com/mattwilliamson/webpipr/master/caller.gif)
